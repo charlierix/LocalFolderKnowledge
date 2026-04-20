@@ -20,9 +20,9 @@ app.MapGet("/listfolders", () =>
 })
 .WithName("GetListFolders");
 
-app.MapPost("/addfolder", () =>
+app.MapPost("/addfolder", (AddFolderRequest request) =>
 {
-    return AddFolder.Add();
+    return AddFolder.Add(request);
 })
 .WithName("PostAddFolder");
 

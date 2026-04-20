@@ -6,7 +6,14 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
     {
         public static FolderEntry[] List()
         {
-            return [];
+            try
+            {
+                return [];
+            }
+            catch (Exception ex)
+            {
+                return [];
+            }
         }
     }
 }

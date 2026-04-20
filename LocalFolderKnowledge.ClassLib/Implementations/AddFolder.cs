@@ -6,11 +6,22 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
     {
         public static AddFolderResponse Add(AddFolderRequest request)
         {
-            return new AddFolderResponse
+            try
             {
-                IsSuccess = false,
-                ErrorMessage = "FINISH THIS",
-            };
+                return new AddFolderResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "FINISH THIS",
+                };
+            }
+            catch (Exception ex)
+            {
+                return new AddFolderResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = $"Caught exception: {ex.Message}",
+                };
+            }
         }
     }
 }

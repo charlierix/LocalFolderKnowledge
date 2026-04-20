@@ -4,7 +4,7 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
 {
     public static class ListFolders
     {
-        public static FolderEntry[] List()
+        public static FolderEntry[] List(string folderLocation)
         {
             try
             {

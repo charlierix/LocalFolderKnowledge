@@ -1,0 +1,6 @@
+@LocalFolderKnowledge.RestAPI_HostAddress = http://localhost:5194
+
+GET {{LocalFolderKnowledge.RestAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

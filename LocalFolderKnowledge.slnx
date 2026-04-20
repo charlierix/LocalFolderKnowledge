@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="LocalFolderKnowledge.ClassLib/LocalFolderKnowledge.ClassLib.csproj" Id="1470c326-7df3-42a8-9ab6-fbad50728f25" />
   <Project Path="LocalFolderKnowledge.RestAPI/LocalFolderKnowledge.RestAPI.csproj" />
 </Solution>

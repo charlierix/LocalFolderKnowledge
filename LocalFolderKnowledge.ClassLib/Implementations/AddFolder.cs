@@ -1,4 +1,5 @@
-﻿using LocalFolderKnowledge.ClassLib.Models;
+using LocalFolderKnowledge.ClassLib.Models;
+using System.Text.Json;
 
 namespace LocalFolderKnowledge.ClassLib.Implementations
 {
@@ -8,35 +9,38 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
         {
             try
             {
+                // Validate configuration path
                 if (string.IsNullOrWhiteSpace(folderLocation) || !Directory.Exists(folderLocation))
+                {
                     return new AddFolderResponse
                     {
                         IsSuccess = false,
                         ErrorMessage = "Invalid folder location from config",
                     };
+                }
 
+                // Validate source folder
                 if (string.IsNullOrWhiteSpace(request?.SourceFolder) || !Directory.Exists(request.SourceFolder))
+                {
                     return new AddFolderResponse
                     {
                         IsSuccess = false,
                         ErrorMessage = "Invalid source folder",
                     };
+                }
 
+                // Get existing folders to help with ensuring name uniqueness
                 var existing = ListFolders.List(folderLocation);
 
+                // Figure out unique name and folder name
                 var names = GetName(request.Name, request.SourceFolder, folderLocation, existing);
 
+                // Create subfolder under folderLocation (D:\LocalFolderKnowledge), copy request folder if told to
+                var entry = CreateSubfolder(request, names.name, folderLocation, names.subfolder);
 
 
 
-
-
-
-
-
-
-
-
+                // use a pool of long running threads to parse this folder
 
 
 
@@ -45,8 +49,8 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
 
                 return new AddFolderResponse
                 {
-                    IsSuccess = false,
-                    ErrorMessage = "FINISH THIS",
+                    IsSuccess = true,
+                    Entry = entry,
                 };
             }
             catch (Exception ex)
@@ -54,7 +58,7 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
                 return new AddFolderResponse
                 {
                     IsSuccess = false,
-                    ErrorMessage = $"Caught exception: {ex.Message}",
+                    ErrorMessage = ex.Message
                 };
             }
         }
@@ -65,19 +69,80 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
         {
             string sourceFolder_leaf = Path.GetFileName(sourceFolder);
 
-            string name_attempt = string.IsNullOrWhiteSpace(name) ? sourceFolder_leaf : name;
+            string name_attempt = string.IsNullOrWhiteSpace(name) ?
+                sourceFolder_leaf :
+                name;
 
+            string escaped_name = FileSystemUtils.EscapeFilename(name_attempt);
 
-            // look through existing and make sure:
-            //  name is unique
-            //  new LiveSourceFolder will be unique (
+            // Make sure name is unique
+            string new_name = name_attempt;
+            string new_subfolder = FileSystemUtils.EscapeFilename(name_attempt);
 
+            int counter = 0;
 
+            while (true)
+            {
+                // Check for either to make sure they get the same unique number suffix
+                if (existing.FirstOrDefault(o => o.Name.Equals(new_name, StringComparison.OrdinalIgnoreCase) || o.LiveSourceFolder.Equals(new_subfolder, StringComparison.OrdinalIgnoreCase)) == null)
+                    break;
 
+                counter++;
+                new_name = $"{name_attempt} {counter}";
+                new_subfolder = $"{escaped_name} {counter}";
+            }
 
+            return (new_name, new_subfolder);
+        }
 
+        private static FolderEntry CreateSubfolder(AddFolderRequest request, string name, string folderLocation, string subfolder)
+        {
+            var entry = new FolderEntry
+            {
+                Name = name,
+                OriginalSourceFolder = request.SourceFolder,
+                LiveSourceFolder = subfolder,
+                IsCopy = request.ShouldCopyContents,
+                IsFinishedParsing = false,
+            };
 
-            return ("a", "b");
+            string foldername = Path.Combine(folderLocation, subfolder);
+
+            Directory.CreateDirectory(foldername);
+
+            if (request.ShouldCopyContents)
+            {
+                string copy_foldername = Path.Combine(foldername, entry.CopyFolder);
+                CopyDirectory(request.SourceFolder, copy_foldername, true);
+            }
+
+            var entrySettings = new EntrySettings
+            {
+                Entry = entry,
+            };
+
+            string jsonString = JsonSerializer.Serialize(entrySettings, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(Path.Combine(foldername, EntrySettings.SETTINGS_FILENAME), jsonString);
+
+            return entry;
+        }
+
+        private static void CopyDirectory(string sourceDir, string destinationDir, bool recursive = true)
+        {
+            var dir = new DirectoryInfo(sourceDir);
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException($"Source: {dir.FullName}");
+
+            Directory.CreateDirectory(destinationDir);
+
+            // Copy files
+            foreach (FileInfo file in dir.GetFiles())
+                file.CopyTo(Path.Combine(destinationDir, file.Name), true);
+
+            // Recursive copy subdirectories
+            if (recursive)
+                foreach (DirectoryInfo subDir in dir.GetDirectories())
+                    CopyDirectory(subDir.FullName, Path.Combine(destinationDir, subDir.Name), true);
         }
 
         #endregion

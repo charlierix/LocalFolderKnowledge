@@ -1,4 +1,5 @@
 using LocalFolderKnowledge.ClassLib.Models;
+using LocalFolderKnowledge.ClassLib.Utils;
 using System.Text.Json;
 
 namespace LocalFolderKnowledge.ClassLib.Implementations
@@ -42,7 +43,7 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
 
                 // use a pool of long running threads to parse this folder
 
-
+                RagAnythingAccessor.AnalyzeFolder(entry.source_folder, entry.rag_folder);
 
 
 
@@ -50,7 +51,7 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
                 return new AddFolderResponse
                 {
                     IsSuccess = true,
-                    Entry = entry,
+                    Entry = entry.entry,
                 };
             }
             catch (Exception ex)
@@ -95,7 +96,7 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
             return (new_name, new_subfolder);
         }
 
-        private static FolderEntry CreateSubfolder(AddFolderRequest request, string name, string folderLocation, string subfolder)
+        private static (FolderEntry entry, string source_folder, string rag_folder) CreateSubfolder(AddFolderRequest request, string name, string folderLocation, string subfolder)
         {
             var entry = new FolderEntry
             {
@@ -110,11 +111,15 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
 
             Directory.CreateDirectory(foldername);
 
+            string source_folder = request.SourceFolder;
             if (request.ShouldCopyContents)
             {
                 string copy_foldername = Path.Combine(foldername, entry.CopyFolder);
+                source_folder = copy_foldername;
                 CopyDirectory(request.SourceFolder, copy_foldername, true);
             }
+
+            string raganything_folder = Path.Combine(foldername, FolderEntry.RAG_FOLDER);
 
             var entrySettings = new EntrySettings
             {
@@ -124,7 +129,7 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
             string jsonString = JsonSerializer.Serialize(entrySettings, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(Path.Combine(foldername, EntrySettings.SETTINGS_FILENAME), jsonString);
 
-            return entry;
+            return (entry, source_folder, raganything_folder);
         }
 
         private static void CopyDirectory(string sourceDir, string destinationDir, bool recursive = true)

@@ -85,7 +85,7 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
             while (true)
             {
                 // Check for either to make sure they get the same unique number suffix
-                if (existing.FirstOrDefault(o => o.Name.Equals(new_name, StringComparison.OrdinalIgnoreCase) || o.LiveSourceFolder.Equals(new_subfolder, StringComparison.OrdinalIgnoreCase)) == null)
+                if (existing.FirstOrDefault(o => o.Name.Equals(new_name, StringComparison.OrdinalIgnoreCase) || o.SubFolder.Equals(new_subfolder, StringComparison.OrdinalIgnoreCase)) == null)
                     break;
 
                 counter++;
@@ -102,24 +102,17 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
             {
                 Name = name,
                 OriginalSourceFolder = request.SourceFolder,
-                LiveSourceFolder = subfolder,
+                SubFolder = subfolder,
                 IsCopy = request.ShouldCopyContents,
                 IsFinishedParsing = false,
             };
 
-            string foldername = Path.Combine(folderLocation, subfolder);
+            var folders = entry.GetFolders(folderLocation);
 
-            Directory.CreateDirectory(foldername);
+            Directory.CreateDirectory(folders.sub_folder);
 
-            string source_folder = request.SourceFolder;
             if (request.ShouldCopyContents)
-            {
-                string copy_foldername = Path.Combine(foldername, entry.CopyFolder);
-                source_folder = copy_foldername;
-                CopyDirectory(request.SourceFolder, copy_foldername, true);
-            }
-
-            string raganything_folder = Path.Combine(foldername, FolderEntry.RAG_FOLDER);
+                CopyDirectory(request.SourceFolder, folders.source_folder, true);
 
             var entrySettings = new EntrySettings
             {
@@ -127,9 +120,9 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
             };
 
             string jsonString = JsonSerializer.Serialize(entrySettings, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(Path.Combine(foldername, EntrySettings.SETTINGS_FILENAME), jsonString);
+            File.WriteAllText(Path.Combine(folders.sub_folder, EntrySettings.SETTINGS_FILENAME), jsonString);
 
-            return (entry, source_folder, raganything_folder);
+            return (entry, folders.sub_folder, folders.rag_folder);
         }
 
         private static void CopyDirectory(string sourceDir, string destinationDir, bool recursive = true)

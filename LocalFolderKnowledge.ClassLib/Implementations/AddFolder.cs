@@ -40,10 +40,13 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
                 var entry = CreateSubfolder(request, names.name, folderLocation, names.subfolder);
 
 
+                // Make sure that venv is created under folderLocation
+                PythonUtil.EnsureVirtualEnvironmentCreated(folderLocation);
 
-                // use a pool of long running threads to parse this folder
 
-                RagAnythingAccessor.AnalyzeFolder(entry.source_folder, entry.rag_folder);
+                // TODO: use a pool of long running threads to parse this folder
+
+                RagAnythingAccessor.AnalyzeFolder(folderLocation, entry.source_folder, entry.rag_folder);
 
 
 

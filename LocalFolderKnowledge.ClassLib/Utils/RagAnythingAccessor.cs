@@ -10,7 +10,7 @@ namespace LocalFolderKnowledge.ClassLib.Utils
             string pythonExe = PythonUtil.GetPythonExe(baseFolder);
 
             if (!File.Exists(pythonExe))
-                pythonExe = "python";
+                throw new ApplicationException("Couldn't find python.exe in virtual environment");
             
             // Create the process start info
             ProcessStartInfo startInfo = new ProcessStartInfo

@@ -43,9 +43,6 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
                 // Make sure that venv is created under folderLocation
                 PythonUtil.EnsureVirtualEnvironmentCreated(folderLocation);
 
-                // TODO: make sure necessary packages are installed
-                //PythonUtil.PipInstall("");
-
 
                 // TODO: use a pool of long running threads to process this folder
 

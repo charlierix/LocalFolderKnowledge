@@ -43,9 +43,17 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
                 // Make sure that venv is created under folderLocation
                 PythonUtil.EnsureVirtualEnvironmentCreated(folderLocation);
 
+                // TODO: make sure necessary packages are installed
+                //PythonUtil.PipInstall("");
 
-                // TODO: use a pool of long running threads to parse this folder
 
+                // TODO: use a pool of long running threads to process this folder
+
+
+                // TODO: run a pre scan that converts filetypes into parsable files (videos into transcripts, dlls into decompiled code, etc)
+
+
+                // TODO: this isn't referencing the virtual environment's python exe
                 RagAnythingAccessor.AnalyzeFolder(folderLocation, entry.source_folder, entry.rag_folder);
 
 

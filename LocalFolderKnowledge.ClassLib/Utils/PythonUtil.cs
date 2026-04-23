@@ -6,7 +6,7 @@ namespace LocalFolderKnowledge.ClassLib.Utils
 {
     public static class PythonUtil
     {
-        public const string VENV = "venv";
+        public const string VENV = ".venv";
 
         public static void EnsureVirtualEnvironmentCreated(string baseFolder)
         {
@@ -19,7 +19,7 @@ namespace LocalFolderKnowledge.ClassLib.Utils
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = "python",
-                    Arguments = $"-m {VENV} " + venvPath,
+                    Arguments = $"-m venv " + venvPath,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,

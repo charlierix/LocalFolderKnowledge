@@ -11,19 +11,15 @@ namespace LocalFolderKnowledge.ClassLib.Utils
 
             if (!File.Exists(pythonExe))
                 throw new ApplicationException("Couldn't find python.exe in virtual environment");
-            
-            // Create the process start info
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = pythonExe,
-                Arguments = $"-m rag_anything.cli index --input \"{analyzefolder}\" --output \"{saveFolder}\"",
-            };
-            
-            // Start the process and wait for completion
-            using (Process process = Process.Start(startInfo))
-            {
-                process.WaitForExit();
-            }
+
+
+            // I don't think there is a cli, it's probably halucinated
+
+            ProcessUtil.RunExe(
+                pythonExe,
+                $"-m rag_anything.cli index --input \"{analyzefolder}\" --output \"{saveFolder}\"",
+                analyzefolder,
+                "rag-anything had an error analyzing folder");
         }
     }
 }

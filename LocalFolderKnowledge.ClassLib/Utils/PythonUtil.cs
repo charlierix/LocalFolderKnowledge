@@ -29,6 +29,7 @@ namespace LocalFolderKnowledge.ClassLib.Utils
             UpgradePython(folder);
 
             PipInstall(folder, "raganything[all]", true);
+            PipInstall(folder, "ollama", true);
         }
 
         private static void UpgradePython(string folder)

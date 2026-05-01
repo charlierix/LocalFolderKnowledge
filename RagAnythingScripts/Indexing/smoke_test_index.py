@@ -14,10 +14,13 @@ from raganything import RAGAnything, RAGAnythingConfig
 from lightrag.utils import EmbeddingFunc
 from lightrag.llm.openai import openai_complete_if_cache
 
+
+# Why is this here?
 # Ensure examples_repo is in path for local raganything import if not globally installed
-repo_path = str(Path(__file__).parents[2] / "examples_repo")
-if repo_path not in sys.path:
-    sys.path.insert(0, repo_path)
+# repo_path = str(Path(__file__).parents[2] / "examples_repo")
+# if repo_path not in sys.path:
+#     sys.path.insert(0, repo_path)
+
 
 # Supported text extensions for smoke test
 TEXT_EXTENSIONS = {
@@ -30,7 +33,7 @@ TEXT_EXTENSIONS = {
 
 async def main(input_folder: str, output_folder: str):
     script_dir = Path(__file__).parent
-    config_path = script_dir / "config.json"
+    config_path = script_dir.parent / "config.json"
     
     if not config_path.exists():
         print(f"❌ Config file not found: {config_path}")
@@ -39,10 +42,11 @@ async def main(input_folder: str, output_folder: str):
     with open(config_path, "r") as f:
         config = json.load(f)
         
-    ollama_host = config.get("ollama_host", "http://localhost:11434")
-    llm_model = config.get("llm_model", "llama3.2")
-    embed_model = config.get("embedding_model", "nomic-embed-text")
-    embed_dim = int(config.get("embedding_dim", 768))
+    ollama_host_llm = config.get("ollama_host_llm")
+    ollama_host_embed = config.get("ollama_host_embed")
+    llm_model = config.get("llm_model")
+    embed_model = config.get("embedding_model")
+    embed_dim = int(config.get("embedding_dim"))
     
     # Ollama LLM wrapper
     async def ollama_llm(prompt, system_prompt=None, history_messages=None, **kwargs):
@@ -51,7 +55,7 @@ async def main(input_folder: str, output_folder: str):
             prompt=prompt,
             system_prompt=system_prompt,
             history_messages=history_messages or [],
-            base_url=f"{ollama_host}/v1",
+            base_url=f"{ollama_host_llm}/v1",
             api_key="ollama",
             **kwargs
         )
@@ -59,14 +63,14 @@ async def main(input_folder: str, output_folder: str):
     # Ollama Embedding wrapper
     async def ollama_embed(texts):
         import ollama
-        client = ollama.AsyncClient(host=ollama_host)
+        client = ollama.AsyncClient(host=ollama_host_embed)
         resp = await client.embed(model=embed_model, input=texts)
         return resp.embeddings
 
     # Initialize RAG-Anything
     rag_cfg = RAGAnythingConfig(
         working_dir=output_folder,
-        parser="txt",
+        parser="mineru",
         parse_method="txt",
         enable_image_processing=False,
         enable_table_processing=False,
@@ -79,7 +83,7 @@ async def main(input_folder: str, output_folder: str):
         func=ollama_embed
     )
 
-    print(f"🚀 Initializing rag-anything (Ollama: {ollama_host})...")
+    print(f"🚀 Initializing rag-anything (Ollama llm: {ollama_host_llm}, Ollama embed: {ollama_host_embed})...")
     rag = RAGAnything(
         config=rag_cfg,
         llm_model_func=ollama_llm,
@@ -129,5 +133,8 @@ if __name__ == "__main__":
         print(f"❌ Input folder not found: {args.input_folder}")
         sys.exit(1)
 
-    os.makedirs(args.output_folder, exist_ok=True)
+    if not os.path.isdir(args.output_folder):
+        print(f"❌ Output folder not found: {args.output_folder}")
+        sys.exit(1)
+
     asyncio.run(main(args.input_folder, args.output_folder))

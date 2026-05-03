@@ -24,8 +24,7 @@ namespace LocalFolderKnowledge.ClassLib.Utils
                 return;
 
             // Create virtual environment using Python
-            // NOTE: raganything pip install fails with 3.14 (as of 5/1/2026)
-            ProcessUtil.RunExe("py", $"-3.13 -m venv {VIRTUAL_ENV}", folder, "Error setting up virtual environment");
+            ProcessUtil.RunExe("python", $"-m venv {VIRTUAL_ENV}", folder, "Error setting up virtual environment");
 
             UpgradePython(folder);
 

@@ -70,17 +70,8 @@ async def main(input_folder: str, output_folder: str):
     # Initialize RAG-Anything
     rag_cfg = RAGAnythingConfig(
         working_dir=output_folder,
-
-
-        # can't get it to parse a json file as text.  probably need to add a .txt extension and set parse_method="txt"
-
-        # parser="docling",
         parser="mineru",
-        # parse_method="txt",
-        parse_method="auto",
-
-
-
+        parse_method="txt",
         enable_image_processing=False,
         enable_table_processing=False,
         enable_equation_processing=False,

@@ -50,8 +50,8 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
                 // TODO: run a pre scan that converts filetypes into parsable files (videos into transcripts, dlls into decompiled code, etc)
 
 
-                // TODO: this call fails.  there doesn't seem to be a cli, need to make a python script
-                //RagAnythingAccessor.AnalyzeFolder(folderLocation, entry.source_folder, entry.rag_folder);
+                // TODO: this isn't referencing the virtual environment's python exe
+                RagAnythingAccessor.AnalyzeFolder(folderLocation, entry.source_folder, entry.rag_folder);
 
 
 
@@ -117,17 +117,11 @@ namespace LocalFolderKnowledge.ClassLib.Implementations
 
             var folders = entry.GetFolders(folderLocation);
 
-            // Sub Folder
             Directory.CreateDirectory(folders.sub_folder);
 
-            // Possibly copy into this sub folder
             if (request.ShouldCopyContents)
                 CopyDirectory(request.SourceFolder, folders.source_folder, true);
 
-            // Folders to store analysis
-            Directory.CreateDirectory(Path.Combine(folders.sub_folder, "rag-anything"));
-
-            // settings.json
             var entrySettings = new EntrySettings
             {
                 Entry = entry,

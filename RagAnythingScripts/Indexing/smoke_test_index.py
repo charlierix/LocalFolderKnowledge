@@ -76,8 +76,8 @@ async def main(input_folder: str, output_folder: str):
 
         # parser="docling",
         parser="mineru",
-        # parse_method="txt",
-        parse_method="auto",
+        parse_method="txt",
+        # parse_method="auto",
 
 
 

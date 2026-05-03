@@ -31,6 +31,7 @@ namespace LocalFolderKnowledge.ClassLib.Utils
 
             PipInstall(folder, "raganything[all]", true);
             PipInstall(folder, "ollama", true);
+            PipInstall(folder, "nest_asyncio", true);
         }
 
         private static void UpgradePython(string folder)
